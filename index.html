@@ -21,13 +21,13 @@
     --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Arial, sans-serif;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html{font-size:18px;}
+  html{font-size:15px;}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--font);}
   body{padding-bottom:90px; line-height:1.4;}
 
   header.topbar{
     background:#fff; border-bottom:2px solid var(--line);
-    padding:16px; position:sticky; top:0; z-index:20;
+    padding:12px 14px; position:sticky; top:0; z-index:20;
   }
   .brand{display:flex; align-items:center; justify-content:space-between; gap:10px;}
   .brand h1{font-size:1.5rem; margin:0; font-weight:800; color:var(--text);}
@@ -50,7 +50,7 @@
   .sync-dot.on{background:var(--primary);}
   .sync-dot.off{background:var(--danger);}
 
-  main{padding:16px 14px 4px; max-width:640px; margin:0 auto;}
+  main{padding:12px 12px 4px; max-width:640px; margin:0 auto;}
   .tabpanel{display:none;}
   .tabpanel.active{display:block;}
 
@@ -80,14 +80,14 @@
     margin-bottom:18px; overflow:hidden;
   }
   .card-head{
-    display:flex; align-items:center; gap:10px; padding:14px 16px;
+    display:flex; align-items:center; gap:8px; padding:10px 14px;
     background:var(--primary); color:#fff;
   }
   .card-head .icon{font-size:1.6rem;}
   .card-head h2{font-size:1.15rem; margin:0; font-weight:800;}
 
-  .img-wrap{position:relative; background:#eef0f2; height:170px; border-bottom:2px solid var(--line);}
-  .img-wrap img{width:100%; height:100%; object-fit:cover; display:block;}
+  .img-wrap{position:relative; background:#1a1d21; height:200px; border-bottom:2px solid var(--line);}
+  .img-wrap img{width:100%; height:100%; object-fit:contain; display:block;}
   .img-actions{position:absolute; bottom:8px; left:8px; right:8px; display:flex; gap:8px;}
   .img-actions button{
     flex:1; background:#fff; color:var(--text); border:2px solid var(--line);
@@ -99,7 +99,7 @@
     border:2px solid var(--primary);
   }
 
-  .card-body{padding:16px; display:flex; flex-direction:column; gap:16px;}
+  .card-body{padding:12px; display:flex; flex-direction:column; gap:12px;}
 
   .field{display:flex; flex-direction:column; gap:6px;}
   .field-label{font-size:1rem; color:var(--text); font-weight:700;}
@@ -126,13 +126,13 @@
   .enter-row{display:flex; flex-direction:column; gap:10px;}
   .enter-row button{
     background:var(--primary); color:#fff; border:none; border-radius:12px;
-    padding:16px; font-weight:800; font-size:1.2rem; cursor:pointer;
+    padding:12px; font-weight:800; font-size:1.05rem; cursor:pointer;
   }
   .enter-row button:disabled{background:#b9bfc5; cursor:not-allowed;}
 
   .stats-row{display:flex; gap:10px;}
   .stat-box{
-    flex:1; background:var(--primary-soft); border:2px solid var(--primary); border-radius:12px; padding:14px 8px; text-align:center;
+    flex:1; background:var(--primary-soft); border:2px solid var(--primary); border-radius:10px; padding:10px 8px; text-align:center;
   }
   .stat-box.total{background:var(--accent-soft); border-color:var(--accent);}
   .stat-box .lbl{font-size:0.85rem; color:var(--text-dim); font-weight:700;}
@@ -172,7 +172,7 @@
 
   .cycle-card{background:var(--panel); border:2px solid var(--line); border-radius:14px; margin-bottom:14px; overflow:hidden;}
   .cycle-card .c-head{
-    padding:15px 16px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;
+    padding:12px 14px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;
   }
   .cycle-card .c-head .range{font-size:1.05rem; font-weight:800;}
   .cycle-card .c-head .range small{display:block; font-weight:600; color:var(--text-dim); font-size:0.85rem; margin-top:4px;}
@@ -192,7 +192,7 @@
   }
   .cycle-hist-toggle button.active{background:var(--primary); color:#fff; border-color:var(--primary);}
 
-  footer.app-footer{text-align:center; color:var(--text-dim); font-size:0.85rem; padding:16px 10px 0;}
+  footer.app-footer{text-align:center; color:var(--text-dim); font-size:0.78rem; padding:12px 10px 0;}
 
   input[type=file]{display:none;}
 
@@ -1047,10 +1047,9 @@ $('#settingsSave').addEventListener('click', async ()=>{
   await saveSettingsUrl(url);
   $('#settingsModal').classList.remove('show');
   setSyncStatus(null, 'Connecting…');
-  const ok = await pingSheet();
+  const ok = await syncFromSheet(true);
   if(ok){
-    toast('✅ Connected! Loading your saved data…');
-    await syncFromSheet(true);
+    toast('✅ Connected! Your saved data has been loaded.');
   } else {
     toast('❌ Could not connect — please check the URL');
   }
@@ -1062,8 +1061,8 @@ $('#settingsSave').addEventListener('click', async ()=>{
   await loadSettings();
   renderAll();
   if(scriptUrl){
-    const ok = await pingSheet();
-    if(ok) await syncFromSheet(false);
+    setSyncStatus(null, 'Connecting…');
+    await syncFromSheet(false);
   } else {
     setSyncStatus('off', 'Not connected — tap ⚙️ to connect Google Sheet');
   }
