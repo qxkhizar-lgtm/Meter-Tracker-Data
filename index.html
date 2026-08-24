@@ -31,10 +31,6 @@
   }
   .brand{display:flex; align-items:center; justify-content:space-between; gap:10px;}
   .brand h1{font-size:1.5rem; margin:0; font-weight:800; color:var(--text);}
-  .gear-btn{
-    background:#fff; border:2px solid var(--line); border-radius:10px;
-    width:44px; height:44px; font-size:1.3rem; cursor:pointer; flex-shrink:0;
-  }
   .clock{
     margin-top:8px; background:var(--primary-soft); border:2px solid var(--primary);
     border-radius:10px; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;
@@ -203,26 +199,6 @@
     max-width:90%; text-align:center;
   }
   .toast.show{opacity:1;}
-
-  /* Settings modal */
-  .modal-overlay{
-    position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200;
-    display:none; align-items:flex-end; justify-content:center;
-  }
-  .modal-overlay.show{display:flex;}
-  .modal-box{
-    background:#fff; width:100%; max-width:520px; border-radius:18px 18px 0 0;
-    padding:20px; max-height:85vh; overflow-y:auto;
-  }
-  .modal-box h3{margin:0 0 10px; font-size:1.2rem;}
-  .modal-box p{font-size:0.95rem; color:var(--text-dim); line-height:1.5;}
-  .modal-box .steps{font-size:0.9rem; color:var(--text-dim); line-height:1.7; padding-left:18px;}
-  .modal-actions{display:flex; gap:10px; margin-top:14px;}
-  .modal-actions button{
-    flex:1; padding:14px; border-radius:12px; font-weight:800; font-size:1rem; cursor:pointer; border:2px solid var(--line);
-    background:#fff; color:var(--text-dim);
-  }
-  .modal-actions button.primary{background:var(--primary); color:#fff; border-color:var(--primary);}
 </style>
 </head>
 <body>
@@ -230,7 +206,6 @@
 <header class="topbar">
   <div class="brand">
     <h1>⚡ Meter Tracker</h1>
-    <button class="gear-btn" id="settingsBtn">⚙️</button>
   </div>
   <div class="clock">
     <div class="time" id="clockTime">--:--:--</div>
@@ -375,28 +350,6 @@
 
 <div class="toast" id="toast"></div>
 
-<div class="modal-overlay" id="settingsModal">
-  <div class="modal-box">
-    <h3>🔗 Connect Google Sheet</h3>
-    <p>To make sure no data is ever lost, this app can save every reading straight into your own Google Sheet.</p>
-    <ol class="steps">
-      <li>Create a new Google Sheet</li>
-      <li>Open Extensions → Apps Script</li>
-      <li>Paste in the provided backend code</li>
-      <li>Deploy it as a Web App ("Anyone" can access)</li>
-      <li>Paste the Web App link below</li>
-    </ol>
-    <div class="field">
-      <span class="field-label">Web App URL</span>
-      <input type="url" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/xxxxx/exec">
-    </div>
-    <div class="modal-actions">
-      <button id="settingsCancel">Later</button>
-      <button class="primary" id="settingsSave">Save & Connect</button>
-    </div>
-  </div>
-</div>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
 <script>
 (function(){
@@ -459,11 +412,9 @@ function defaultCycleStart(){
   return `${cy}-${String(cm).padStart(2,'0')}-23`;
 }
 
-/* ---------- Local cache + settings ---------- */
+/* ---------- Local cache ---------- */
 const STORAGE_KEY = 'bijli-ledger-state';
-const SETTINGS_KEY = 'bijli-ledger-script-url';
-const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxrTdqAOprSvFPIJdm4nklKqGcQYxd27_hpUuMvb8guHkKHgpzOoBCHrwTp3Y_QsJ46/exec';
-let scriptUrl = DEFAULT_SCRIPT_URL;
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxrTdqAOprSvFPIJdm4nklKqGcQYxd27_hpUuMvb8guHkKHgpzOoBCHrwTp3Y_QsJ46/exec';
 
 function freshMeter(image){ return { startReading: null, image: image, entries: [] }; }
 function freshCycle(startDate){
@@ -490,30 +441,18 @@ async function saveLocalCache(){
   catch(e){ console.error('Local save failed', e); }
 }
 
-async function loadSettings(){
-  try{
-    const res = await window.storage.get(SETTINGS_KEY);
-    if(res && res.value) scriptUrl = res.value;
-    else scriptUrl = DEFAULT_SCRIPT_URL;
-  }catch(e){ scriptUrl = DEFAULT_SCRIPT_URL; }
-}
-async function saveSettingsUrl(url){
-  scriptUrl = url;
-  try{ await window.storage.set(SETTINGS_KEY, url); }catch(e){}
-}
-
 /* ---------- JSONP sync with Google Sheet ---------- */
 function jsonp(params, timeoutMs){
   return new Promise((resolve, reject)=>{
-    if(!scriptUrl){ reject(new Error('no-url')); return; }
+    if(!SCRIPT_URL){ reject(new Error('no-url')); return; }
     const cbName = 'cb_' + Math.random().toString(36).slice(2);
     const script = document.createElement('script');
     const timer = setTimeout(()=>{ cleanup(); reject(new Error('timeout')); }, timeoutMs || 12000);
     function cleanup(){ delete window[cbName]; script.remove(); clearTimeout(timer); }
     window[cbName] = (data)=>{ cleanup(); resolve(data); };
     const qs = new URLSearchParams(Object.assign({}, params, {callback: cbName})).toString();
-    const sep = scriptUrl.indexOf('?') >= 0 ? '&' : '?';
-    script.src = scriptUrl + sep + qs;
+    const sep = SCRIPT_URL.indexOf('?') >= 0 ? '&' : '?';
+    script.src = SCRIPT_URL + sep + qs;
     script.onerror = ()=>{ cleanup(); reject(new Error('script-error')); };
     document.body.appendChild(script);
   });
@@ -527,7 +466,6 @@ function setSyncStatus(mode, text){
 }
 
 async function pingSheet(){
-  if(!scriptUrl){ setSyncStatus('off', 'Not connected — tap ⚙️ to connect Google Sheet'); return false; }
   try{
     await jsonp({action:'ping'}, 8000);
     setSyncStatus('on', 'Connected to Google Sheet');
@@ -595,8 +533,7 @@ function buildStateFromRemote(remote){
 }
 
 async function syncFromSheet(showToastOnFail){
-  if(!scriptUrl) return false;
-  try{
+    try{
     const remote = await jsonp({action:'getAll'});
     if(remote && !remote.error){
       state = buildStateFromRemote(remote);
@@ -1030,42 +967,12 @@ $$('.btn-ocr').forEach(btn=>{
   });
 });
 
-/* ---------- Settings modal ---------- */
-$('#settingsBtn').addEventListener('click', ()=>{
-  $('#scriptUrlInput').value = scriptUrl || '';
-  $('#settingsModal').classList.add('show');
-});
-$('#settingsCancel').addEventListener('click', ()=>{
-  $('#settingsModal').classList.remove('show');
-});
-$('#settingsModal').addEventListener('click', (e)=>{
-  if(e.target.id === 'settingsModal') $('#settingsModal').classList.remove('show');
-});
-$('#settingsSave').addEventListener('click', async ()=>{
-  const url = $('#scriptUrlInput').value.trim();
-  if(!url){ toast('Please paste the Web App URL'); return; }
-  await saveSettingsUrl(url);
-  $('#settingsModal').classList.remove('show');
-  setSyncStatus(null, 'Connecting…');
-  const ok = await syncFromSheet(true);
-  if(ok){
-    toast('✅ Connected! Your saved data has been loaded.');
-  } else {
-    toast('❌ Could not connect — please check the URL');
-  }
-});
-
 /* ---------- Init ---------- */
 (async function init(){
   await loadLocalCache();
-  await loadSettings();
   renderAll();
-  if(scriptUrl){
-    setSyncStatus(null, 'Connecting…');
-    await syncFromSheet(false);
-  } else {
-    setSyncStatus('off', 'Not connected — tap ⚙️ to connect Google Sheet');
-  }
+  setSyncStatus(null, 'Connecting…');
+  await syncFromSheet(false);
 })();
 
 })();
