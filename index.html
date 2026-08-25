@@ -110,15 +110,6 @@
     flex-shrink:0; background:#fff; border:2px solid var(--line); color:var(--text-dim);
     border-radius:10px; padding:0 16px; font-size:1.3rem; cursor:pointer;
   }
-  .date-preview{font-size:0.9rem; color:var(--text-dim); font-weight:600;}
-  .date-display-btn{
-    width:100%; text-align:left; background:#fff; border:2px solid var(--line); color:var(--text);
-    padding:14px; border-radius:10px; font-size:1.15rem; font-weight:700; cursor:pointer; font-family:var(--font);
-    display:flex; align-items:center; justify-content:space-between;
-  }
-  .date-display-btn::after{content:"📅"; font-size:1.2rem;}
-  .date-display-btn:active{border-color:var(--primary);}
-
   .enter-row{display:flex; flex-direction:column; gap:10px;}
   .enter-row button{
     background:var(--primary); color:#fff; border:none; border-radius:12px;
@@ -244,12 +235,7 @@
           </div>
         </div>
         <div class="field">
-          <span class="field-label">2. Today's Date</span>
-          <button type="button" class="date-display-btn" id="date-display-upar"></button>
-          <input type="date" id="date-upar" style="position:absolute; opacity:0; width:1px; height:1px; pointer-events:none;">
-        </div>
-        <div class="field">
-          <span class="field-label">3. Today's Meter Reading</span>
+          <span class="field-label">2. Today's Meter Reading</span>
           <div class="enter-row">
             <input type="number" step="0.01" inputmode="decimal" id="current-upar" placeholder="Enter number">
             <button id="save-upar">✅ Save Reading</button>
@@ -292,12 +278,7 @@
           </div>
         </div>
         <div class="field">
-          <span class="field-label">2. Today's Date</span>
-          <button type="button" class="date-display-btn" id="date-display-neechy"></button>
-          <input type="date" id="date-neechy" style="position:absolute; opacity:0; width:1px; height:1px; pointer-events:none;">
-        </div>
-        <div class="field">
-          <span class="field-label">3. Today's Meter Reading</span>
+          <span class="field-label">2. Today's Meter Reading</span>
           <div class="enter-row">
             <input type="number" step="0.01" inputmode="decimal" id="current-neechy" placeholder="Enter number">
             <button id="save-neechy">✅ Save Reading</button>
@@ -566,10 +547,6 @@ function renderCalc(){
       startInput.disabled = false;
     }
 
-    const dateInput = $('#date-'+key);
-    if(!dateInput.value) dateInput.value = todayPK();
-    $('#date-display-'+key).textContent = fmtDateHuman(dateInput.value);
-
     const lastEntry = m.entries[m.entries.length-1];
     const todayUsage = lastEntry ? lastEntry.usage : 0;
     const totalUsage = m.entries.reduce((s,e)=>s+e.usage, 0);
@@ -658,19 +635,6 @@ $$('.hist-tab-btn').forEach(btn=>{
   });
 });
 
-/* ---------- Date field: custom display + hidden native picker ---------- */
-['upar','neechy'].forEach(key=>{
-  const nativeInput = $('#date-'+key);
-  const displayBtn = $('#date-display-'+key);
-  displayBtn.addEventListener('click', ()=>{
-    if(nativeInput.showPicker){ nativeInput.showPicker(); }
-    else { nativeInput.focus(); nativeInput.click(); }
-  });
-  nativeInput.addEventListener('change', ()=>{
-    displayBtn.textContent = fmtDateHuman(nativeInput.value);
-  });
-});
-
 /* ---------- Start reading lock/unlock ---------- */
 $$('.unlock-btn[data-meter]').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -737,7 +701,7 @@ async function saveEntry(key){
   }
   const readingVal = parseFloat($('#current-'+key).value);
   if(isNaN(readingVal)){ toast('Please enter a valid reading'); return; }
-  const dateVal = $('#date-'+key).value || todayPK();
+  const dateVal = todayPK();
 
   const rolled = maybeRollCycle(dateVal);
   const activeCyc = state.currentCycle;
