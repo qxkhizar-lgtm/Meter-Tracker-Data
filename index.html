@@ -21,19 +21,19 @@
     --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Arial, sans-serif;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html{font-size:15px;}
+  html{font-size:14px;}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--font);}
   body{padding-bottom:90px; line-height:1.4;}
 
   header.topbar{
     background:#fff; border-bottom:2px solid var(--line);
-    padding:12px 14px; position:sticky; top:0; z-index:20;
+    padding:10px 12px; position:sticky; top:0; z-index:20;
   }
   .brand{display:flex; align-items:center; justify-content:space-between; gap:10px;}
   .brand h1{font-size:1.5rem; margin:0; font-weight:800; color:var(--text);}
   .clock{
-    margin-top:8px; background:var(--primary-soft); border:2px solid var(--primary);
-    border-radius:10px; padding:8px 12px; display:flex; justify-content:space-between; align-items:center;
+    margin-top:6px; background:var(--primary-soft); border:2px solid var(--primary);
+    border-radius:10px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center;
   }
   .clock .time{font-size:1.7rem; font-weight:800; color:var(--primary-dark); letter-spacing:1px;}
   .clock .date{font-size:0.95rem; color:var(--text-dim); font-weight:600;}
@@ -46,7 +46,7 @@
   .sync-dot.on{background:var(--primary);}
   .sync-dot.off{background:var(--danger);}
 
-  main{padding:12px 12px 4px; max-width:640px; margin:0 auto;}
+  main{padding:10px 10px 4px; max-width:640px; margin:0 auto;}
   .tabpanel{display:none;}
   .tabpanel.active{display:block;}
 
@@ -76,13 +76,13 @@
     margin-bottom:18px; overflow:hidden;
   }
   .card-head{
-    display:flex; align-items:center; gap:8px; padding:10px 14px;
+    display:flex; align-items:center; gap:6px; padding:8px 12px;
     background:var(--primary); color:#fff;
   }
   .card-head .icon{font-size:1.6rem;}
   .card-head h2{font-size:1.15rem; margin:0; font-weight:800;}
 
-  .img-wrap{position:relative; background:#1a1d21; height:200px; border-bottom:2px solid var(--line);}
+  .img-wrap{position:relative; background:#1a1d21; height:170px; border-bottom:2px solid var(--line);}
   .img-wrap img{width:100%; height:100%; object-fit:contain; display:block;}
   .img-actions{position:absolute; bottom:8px; left:8px; right:8px; display:flex; gap:8px;}
   .img-actions button{
@@ -95,7 +95,7 @@
     border:2px solid var(--primary);
   }
 
-  .card-body{padding:12px; display:flex; flex-direction:column; gap:12px;}
+  .card-body{padding:10px; display:flex; flex-direction:column; gap:10px;}
 
   .field{display:flex; flex-direction:column; gap:6px;}
   .field-label{font-size:1rem; color:var(--text); font-weight:700;}
@@ -122,13 +122,13 @@
   .enter-row{display:flex; flex-direction:column; gap:10px;}
   .enter-row button{
     background:var(--primary); color:#fff; border:none; border-radius:12px;
-    padding:12px; font-weight:800; font-size:1.05rem; cursor:pointer;
+    padding:10px; font-weight:800; font-size:1rem; cursor:pointer;
   }
   .enter-row button:disabled{background:#b9bfc5; cursor:not-allowed;}
 
   .stats-row{display:flex; gap:10px;}
   .stat-box{
-    flex:1; background:var(--primary-soft); border:2px solid var(--primary); border-radius:10px; padding:10px 8px; text-align:center;
+    flex:1; background:var(--primary-soft); border:2px solid var(--primary); border-radius:10px; padding:8px; text-align:center;
   }
   .stat-box.total{background:var(--accent-soft); border-color:var(--accent);}
   .stat-box .lbl{font-size:0.85rem; color:var(--text-dim); font-weight:700;}
@@ -188,7 +188,7 @@
   }
   .cycle-hist-toggle button.active{background:var(--primary); color:#fff; border-color:var(--primary);}
 
-  footer.app-footer{text-align:center; color:var(--text-dim); font-size:0.78rem; padding:12px 10px 0;}
+  footer.app-footer{text-align:center; color:var(--text-dim); font-size:0.72rem; padding:10px 10px 0;}
 
   input[type=file]{display:none;}
 
@@ -220,7 +220,6 @@
 <main>
 
   <section class="tabpanel active" id="tab-calc">
-    <div class="banner" id="cycleBanner" style="display:none;"></div>
 
     <div class="card" data-meter="upar">
       <div class="card-head">
@@ -334,10 +333,6 @@
     </div>
   </section>
 
-  <section class="tabpanel" id="tab-cycles">
-    <div id="cyclesList"></div>
-  </section>
-
 </main>
 
 <footer class="app-footer">Your data is saved to your own Google Sheet.</footer>
@@ -345,7 +340,6 @@
 <nav class="tabs">
   <button data-tab="calc" class="active"><span class="ic">📟</span>Calculator</button>
   <button data-tab="hist"><span class="ic">📜</span>History</button>
-  <button data-tab="cycles"><span class="ic">🗂</span>Past Cycles</button>
 </nav>
 
 <div class="toast" id="toast"></div>
@@ -554,14 +548,10 @@ async function syncFromSheet(showToastOnFail){
 function renderAll(){
   renderCalc();
   renderHistory();
-  renderCycles();
 }
 
 function renderCalc(){
   const cyc = state.currentCycle;
-  const cycleEnd = addOneMonth(cyc.startDate);
-  $('#cycleBanner').style.display = 'block';
-  $('#cycleBanner').innerHTML = `Current Billing Cycle: <b>${fmtDateHuman(cyc.startDate)}</b> to <b>${fmtDateHuman(cycleEnd)}</b>`;
 
   ['upar','neechy'].forEach(key=>{
     const m = cyc.meters[key];
@@ -646,73 +636,6 @@ async function deleteEntry(key, dateVal){
   }catch(err){
     toast('⚠️ Deleted on this device, but could not reach Google Sheet');
   }
-}
-
-function renderCycles(){
-  const wrap = $('#cyclesList');
-  if(state.archive.length===0){
-    wrap.innerHTML = '<div class="empty-note">No past billing cycles saved yet.</div>';
-    return;
-  }
-  wrap.innerHTML = state.archive.slice().reverse().map((c, idx)=>{
-    const realIdx = state.archive.length-1-idx;
-    const up = c.meters.upar, dn = c.meters.neechy;
-    return `
-    <div class="cycle-card" data-idx="${realIdx}">
-      <div class="c-head">
-        <div class="range">${fmtDateHuman(c.startDate)} → ${fmtDateHuman(c.endDate)}
-          <small>Upper: ${round2(up.totalUsage)} kWh · Lower: ${round2(dn.totalUsage)} kWh</small>
-        </div>
-        <span class="chev">▾</span>
-      </div>
-      <div class="cycle-body">
-        <div class="cs-grid">
-          <div class="cs-box">
-            <h4>⬆️ Upper Meter</h4>
-            <div class="row"><span>Start</span><b>${up.startReading ?? '—'}</b></div>
-            <div class="row"><span>End</span><b>${up.endReading ?? '—'}</b></div>
-            <div class="row"><span>Total</span><b>${round2(up.totalUsage)} kWh</b></div>
-          </div>
-          <div class="cs-box">
-            <h4>⬇️ Lower Meter</h4>
-            <div class="row"><span>Start</span><b>${dn.startReading ?? '—'}</b></div>
-            <div class="row"><span>End</span><b>${dn.endReading ?? '—'}</b></div>
-            <div class="row"><span>Total</span><b>${round2(dn.totalUsage)} kWh</b></div>
-          </div>
-        </div>
-        <div class="cycle-hist-toggle">
-          <button class="c-hist-btn active" data-cycle-hist="upar-${realIdx}">⬆️ Daily Detail</button>
-          <button class="c-hist-btn" data-cycle-hist="neechy-${realIdx}">⬇️ Daily Detail</button>
-        </div>
-        <div class="hist-list" id="c-hist-upar-${realIdx}">${renderCycleEntries(up.entries)}</div>
-        <div class="hist-list" id="c-hist-neechy-${realIdx}" style="display:none;">${renderCycleEntries(dn.entries)}</div>
-      </div>
-    </div>`;
-  }).join('');
-
-  $$('.cycle-card .c-head', wrap).forEach(h=>{
-    h.addEventListener('click', ()=> h.parentElement.classList.toggle('open'));
-  });
-  $$('.c-hist-btn', wrap).forEach(btn=>{
-    btn.addEventListener('click', (e)=>{
-      e.stopPropagation();
-      const group = btn.closest('.cycle-body');
-      $$('.c-hist-btn', group).forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      const [key, idx] = btn.dataset.cycleHist.split('-');
-      $('#c-hist-upar-'+idx, group).style.display = key==='upar' ? 'block' : 'none';
-      $('#c-hist-neechy-'+idx, group).style.display = key==='neechy' ? 'block' : 'none';
-    });
-  });
-}
-
-function renderCycleEntries(entries){
-  if(!entries || entries.length===0) return '<div class="empty-note">No data.</div>';
-  return entries.slice().reverse().map(e=>`
-    <div class="hist-row">
-      <div><div class="d">${fmtDateHuman(e.date)}</div><div class="r">${e.reading} kWh</div></div>
-      <div class="u">+${round2(e.usage)}</div>
-    </div>`).join('');
 }
 
 /* ---------- Tabs ---------- */
@@ -824,7 +747,7 @@ async function saveEntry(key){
     activeM.startReading = readingVal;
     await saveLocalCache();
     renderAll();
-    toast('📦 New billing cycle started! Old cycle saved under "Past Cycles".');
+    toast('📦 New billing cycle started!');
     $('#current-'+key).value = '';
 
     jsonp({
@@ -880,7 +803,7 @@ $('#save-neechy').addEventListener('click', ()=>saveEntry('neechy'));
 
 /* ---------- Manual new cycle ---------- */
 $('#newCycleBtn').addEventListener('click', async ()=>{
-  if(!confirm('Start a new billing cycle now? The current data will move to "Past Cycles".')) return;
+  if(!confirm('Start a new billing cycle now? Today\'s readings will become the new starting readings.')) return;
   const cyc = state.currentCycle;
   const archived = { startDate: cyc.startDate, endDate: todayPK(), meters:{} };
   ['upar','neechy'].forEach(key=>{
